@@ -1,22 +1,55 @@
-int winHeight=900; //maybe delete
-int winWide=1000; //maybe delete
 int paddleSpeed=15;
 int rightPadY=0;
-int ballXSpeed=10;
-int ballYSpeed=10;
-int ballX=50;
-int ballY=50;
+int ballXSpeed=5;
+int ballYSpeed=5;
+int ballX=500;
+int ballY=500;
+int leftScore=0;
+int rightScore=0;
+
+boolean leftHit()
+{
+  //checks if ball is at the say Y as paddle and then at same X
+  if(ballY>=mouseY && ballY<=mouseY+100 && ballX-25<=33) //paddle is in space 0-33 wide
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+boolean rightHit()
+{
+  //checks if ball is at the say Y as paddle and then at same X
+  if(ballY>=rightPadY && ballY<=rightPadY+100 && ballX+25>=width-33) //paddle is in space 0-33 wide
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
 
 void setup() {
-  size(1000, 900);
+  //size(1500, 1000); //window size
+  /*press esc to quit full screen
+    fullscreen(1) launches in screen one is there are multiple screens
+    fullscreen(2) launches in screen two and so on */
+  fullScreen(); //press esc to quit
   noStroke(); //for mouse
   fill(0); //fill shapes in black
+  textSize(64);
 }
 
 void draw() {
   background(255); //white
+  text(leftScore, 50, 60);
+  text(rightScore, width-100, 60);
   ellipseMode(CENTER);
-  if(mouseY<winHeight-100) //left paddle
+  if(mouseY<height-100) //left paddle
   {
     rect(0, mouseY, 33, 100); 
   }
@@ -25,7 +58,7 @@ void draw() {
     rect(0, 800, 33, 100); 
   }
   
-  rect(967,rightPadY,33,100);
+  rect(width-33,rightPadY,33,100);
   if ((keyPressed == true) && (key == 'w')) //right paddle
   {
     if(rightPadY>0)
@@ -39,19 +72,19 @@ void draw() {
   }
   else if((keyPressed == true) && (key == 's'))
   {
-    if(rightPadY<winHeight-100)
+    if(rightPadY<height-100)
     {
       rightPadY+=paddleSpeed; //go down
     }
     else
     {
-      rightPadY=winHeight-100;
+      rightPadY=height-100;
     }
   }
   
   ////////////////////////////
   //makes right paddle also controled with mouse
-  /*if(mouseY<winHeight-100) //right paddle
+  /*if(mouseY<height-100) //right paddle
   {
     rect(967, mouseY, 33, 100); 
   }
@@ -64,22 +97,44 @@ void draw() {
   ellipse(ballX,ballY,50,50);
   ballX+=ballXSpeed;
   ballY+=ballYSpeed;
-  if(ballY>winHeight-50) //stay in bounds in Y
+  if(ballY>height-25) //stay in bounds in Y
   {
      ballYSpeed=-ballYSpeed; 
   }
-  else if(ballY<50)
+  else if(ballY<25)
   {
      ballYSpeed=-ballYSpeed; 
   }
   
-  if(ballX>winWide-50) //stay in bounds in X
+  if(ballX>width-25) //stay in bounds in X
   {
      ballXSpeed=-ballXSpeed; 
   }
-  else if(ballX<50)
+  else if(ballX<25)
   {
      ballXSpeed=-ballXSpeed; 
   }
   
+  //scoring
+  if(ballX<=25)
+  {
+    rightScore++;
+    ballX=width/2; //reset ball
+    ballXSpeed=-ballXSpeed; 
+  }
+  else if(ballX>=width-25)
+  {
+   leftScore++; 
+   ballX=width/2;
+   ballXSpeed=-ballXSpeed; 
+  }
+  
+  if(leftHit())
+  {
+    ballXSpeed=-ballXSpeed;
+  }
+  else if(rightHit())
+  {
+    ballXSpeed=-ballXSpeed; 
+  }
 }
