@@ -1,5 +1,8 @@
 int paddleSpeed=15;
 int rightPadY=0;
+int paddleH=100;
+int paddleW=33;
+int ballS=50; //ball size
 int ballXSpeed=5;
 int ballYSpeed=5;
 int ballX=500;
@@ -10,7 +13,7 @@ int rightScore=0;
 boolean leftHit()
 {
   //checks if ball is at the say Y as paddle and then at same X
-  if(ballY>=mouseY && ballY<=mouseY+100 && ballX-25<=33) //paddle is in space 0-33 wide
+  if(ballY>=mouseY && ballY<=mouseY+paddleH && ballX-ballS/2<=paddleW) //paddle is in space 0-paddleW wide
   {
     return true;
   }
@@ -23,7 +26,7 @@ boolean leftHit()
 boolean rightHit()
 {
   //checks if ball is at the say Y as paddle and then at same X
-  if(ballY>=rightPadY && ballY<=rightPadY+100 && ballX+25>=width-33) //paddle is in space 0-33 wide
+  if(ballY>=rightPadY && ballY<=rightPadY+paddleH && ballX+ballS/2>=width-paddleW) //paddle is in space 0-paddleW wide
   {
     return true;
   }
@@ -34,7 +37,7 @@ boolean rightHit()
 }
 
 void setup() {
-  //size(1500, 1000); //window size
+  //size(1500, paddleH0); //window size
   /*press esc to quit full screen
     fullscreen(1) launches in screen one is there are multiple screens
     fullscreen(2) launches in screen two and so on */
@@ -47,18 +50,22 @@ void setup() {
 void draw() {
   background(255); //white
   text(leftScore, 50, 60);
-  text(rightScore, width-100, 60);
+  text(rightScore, width-paddleH, 60);
   ellipseMode(CENTER);
-  if(mouseY<height-100) //left paddle
+  if (mouseY<0)
   {
-    rect(0, mouseY, 33, 100); 
+    rect(0,0,paddleW,paddleH); //can't go above screen 
+  }
+  else if(mouseY<height-paddleH) //left paddle
+  {
+    rect(0, mouseY, paddleW, paddleH); 
   }
   else
   {
-    rect(0, 800, 33, 100); 
+    rect(0, height-paddleH, paddleW, paddleH); 
   }
   
-  rect(width-33,rightPadY,33,100);
+  rect(width-paddleW,rightPadY,paddleW,paddleH);
   if ((keyPressed == true) && (key == 'w')) //right paddle
   {
     if(rightPadY>0)
@@ -72,57 +79,57 @@ void draw() {
   }
   else if((keyPressed == true) && (key == 's'))
   {
-    if(rightPadY<height-100)
+    if(rightPadY<height-paddleH)
     {
       rightPadY+=paddleSpeed; //go down
     }
     else
     {
-      rightPadY=height-100;
+      rightPadY=height-paddleH; //can't go bellow screen
     }
   }
   
   ////////////////////////////
   //makes right paddle also controled with mouse
-  /*if(mouseY<height-100) //right paddle
+  /*if(mouseY<height-paddleH) //right paddle
   {
-    rect(967, mouseY, 33, 100); 
+    rect(967, mouseY, paddleW, paddleH); 
   }
   else
   {
-    rect(967, 800, 33, 100); 
+    rect(967, 800, paddleW, paddleH); 
   }*/
   ////////////////////////////
   
-  ellipse(ballX,ballY,50,50);
+  ellipse(ballX,ballY,ballS,ballS);
   ballX+=ballXSpeed;
   ballY+=ballYSpeed;
-  if(ballY>height-25) //stay in bounds in Y
+  if(ballY>height-ballS/2) //stay in bounds in Y
   {
      ballYSpeed=-ballYSpeed; 
   }
-  else if(ballY<25)
+  else if(ballY<ballS/2)
   {
      ballYSpeed=-ballYSpeed; 
   }
   
-  if(ballX>width-25) //stay in bounds in X
+  if(ballX>width-ballS/2) //stay in bounds in X
   {
      ballXSpeed=-ballXSpeed; 
   }
-  else if(ballX<25)
+  else if(ballX<ballS/2)
   {
      ballXSpeed=-ballXSpeed; 
   }
   
   //scoring
-  if(ballX<=25)
+  if(ballX<=ballS/2)
   {
     rightScore++;
     ballX=width/2; //reset ball
     ballXSpeed=-ballXSpeed; 
   }
-  else if(ballX>=width-25)
+  else if(ballX>=width-ballS/2)
   {
    leftScore++; 
    ballX=width/2;
@@ -137,4 +144,12 @@ void draw() {
   {
     ballXSpeed=-ballXSpeed; 
   }
+  
+  
+  if ((keyPressed == true) && (key == 'o')) //closes the game
+  {
+    exit();
+  }
+  
+  
 }
