@@ -1,6 +1,6 @@
 import processing.sound.*;
 
-final float SCALER = 10; //change how much an affect loadness has
+final float SCALER = 10; //change how much an affect loudness has
 Amplitude amp;
 AudioIn in;
 
@@ -76,6 +76,9 @@ void draw() {
   }
   //Right Pad
   rightPadY = (int)(height - (height * (amp.analyze() * SCALER)) - paddleH);
+  if (rightPadY <= 0){
+    rightPadY = 0;
+  }
   rect(width-paddleW,rightPadY,paddleW,paddleH);
   
   
