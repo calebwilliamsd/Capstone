@@ -11,6 +11,9 @@ AudioIn in;
 int paddleSpeed=15;
 int paddleH=100;
 int rightPadY;
+int rightPadX=0;//changed in setup
+int leftPadY=0;
+int leftPadX=0;
 int paddleW= 33;
 int ballS=50; //ball size
 int ballXSpeed=5;
@@ -29,13 +32,14 @@ void setup() {
   noStroke(); //for mouse
   fill(0); //fill shapes in black
   textSize(64);
+  rightPadX=width-paddleW;
   in = new AudioIn(this,0);
   in.start();
   amp = new Amplitude(this);
   amp.input(in);
   rightPadY = height - paddleH;
-  rect(width-paddleW,rightPadY,paddleW,paddleH);
-  rect(0,height,paddleW,paddleH);
+  rect(rightPadX,rightPadY,paddleW,paddleH);
+  rect(leftPadX,height,paddleW,paddleH);
   println(width);
 }
 
@@ -44,17 +48,19 @@ void draw() {
   text(leftScore, 50, 60);
   text(rightScore, width-paddleH, 60);
   ellipseMode(CENTER);
-  if (mouseY<0)
+  //Left Pad
+ leftPadY=mouseY;
+  if (leftPadY<0)
   {
-    rect(0,0,paddleW,paddleH); //can't go above screen 
+    rect(leftPadX,0,paddleW,paddleH); //can't go above screen 
   }
-  else if(mouseY<height-paddleH) //left paddle
+  else if(leftPadY<height-paddleH) //left paddle
   {
-    rect(0, mouseY, paddleW, paddleH); 
+    rect(leftPadX, leftPadY, paddleW, paddleH); 
   }
   else
   {
-    rect(0, height-paddleH, paddleW, paddleH); 
+    rect(leftPadX, height-paddleH, paddleW, paddleH); 
   }
   //Right Pad
   
@@ -74,25 +80,7 @@ void draw() {
 
   ellipse(ballX,ballY,ballS,ballS);
   ballX+=ballXSpeed;
-  ballY+=ballYSpeed;
-  if(ballY>height-ballS/2) //stay in bounds in Y
-  {
-     ballYSpeed=-ballYSpeed; 
-  }
-  else if(ballY<ballS/2)
-  {
-     ballYSpeed=-ballYSpeed; 
-  }
-  
-  if(ballX>width-ballS/2) //stay in bounds in X
-  {
-     ballXSpeed=-ballXSpeed; 
-  }
-  else if(ballX<ballS/2)
-  {
-     ballXSpeed=-ballXSpeed; 
-  }
-  
+  ballY+=ballYSpeed;  
   //scoring
   if(ballX<=ballS/2)
   {
@@ -106,6 +94,24 @@ void draw() {
    ballX=width/2;
    ballXSpeed=-ballXSpeed; 
   }
+  if(ballY>height-ballS/2) //stay in bounds in Y
+  {
+     ballYSpeed=-ballYSpeed; 
+  }
+  else if(ballY<ballS/2)
+  {
+     ballYSpeed=-ballYSpeed;
+  }
+  
+  //checks bounds
+  if(ballX>width-ballS/2) //stay in bounds in X
+  {
+     ballXSpeed=-ballXSpeed; 
+  }
+  else if(ballX<ballS/2)
+  {
+     ballXSpeed=-ballXSpeed; 
+  }
   
   if(leftHit())
   {
@@ -114,19 +120,26 @@ void draw() {
   else if(rightHit())
   {
     ballXSpeed=-ballXSpeed; 
-  }
-  
-  
-  
-  
-  
+  } 
 }
+
 boolean leftHit()
 {
   //checks if ball is at the say Y as paddle and then at same X
-  if(ballY>=mouseY && ballY<=mouseY+paddleH && ballX-ballS/2<=paddleW) //paddle is in space 0-paddleW wide
+  if(ballY>=leftPadY && ballY<=leftPadY+paddleH && ballX-ballS/2<=leftPadX+paddleW) //paddle is in space 0-paddleW wide
   {
+    ballX=leftPadX+paddleW+ballS/2+1; //puts ball just off paddle when hit
     return true;
+  }
+  else if(ballY+ballS>=leftPadY && ballY<=leftPadY+paddleH &&  ballX-ballS/2<=leftPadX+paddleW) //detect if slightly bellow paddle
+  {
+    ballX=leftPadX+paddleW+ballS/2+1;
+    return true;
+  }
+  else if(ballY>=leftPadY && ballY-ballS<=leftPadY+paddleH &&  ballX-ballS/2<=leftPadX+paddleW) //detect if slightly above paddle
+  {
+    ballX=leftPadX+paddleW+ballS/2+1;
+     return true; 
   }
   else
   {
@@ -137,8 +150,19 @@ boolean leftHit()
 boolean rightHit()
 {
   //checks if ball is at the say Y as paddle and then at same X
-  if(ballY>=rightPadY && ballY<=rightPadY+paddleH && ballX+ballS/2>=width-paddleW) //paddle is in space 0-paddleW wide
+  if(ballY>=rightPadY && ballY<=rightPadY+paddleH && ballX+ballS/2>=rightPadX) //paddle is in space 0-paddleW wide
   {
+    ballX=rightPadX-ballS/2-1; //puts ball just off paddle when hit
+    return true;
+  }
+  else if(ballY+ballS>=rightPadY && ballY<=rightPadY+paddleH && ballX+ballS/2>=rightPadX) //detect if slightly bellow paddle
+  {
+    ballX=rightPadX-ballS/2-1;
+    return true;
+  }
+  else if(ballY>=rightPadY && ballY-ballS<=rightPadY+paddleH && ballX+ballS/2>=rightPadX) //detect if slightly above paddle
+  {
+    ballX=rightPadX-ballS/2-1;
     return true;
   }
   else
@@ -146,7 +170,6 @@ boolean rightHit()
     return false;
   }
 }
-
 void keyPressed() {
   if ((keyPressed == true) && (key == 'o')) //closes the game
   {
