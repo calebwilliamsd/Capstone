@@ -1,13 +1,17 @@
 import processing.sound.*;
 
-final float SCALER = 10; //change how much an affect loudness has
+final float SCALER = -1000; //change how much an affect loudness has
+float alpha = 0.5;
+float r_yvel = 0;
+float gravity = 9.8; //how fast the paddle falls
+float exceed_gravity = 9.8; //volume must exceed this to fall
 Amplitude amp;
 AudioIn in;
 
 int paddleSpeed=15;
-int rightPadY=0;
 int paddleH=100;
-int paddleW=33;
+int rightPadY;
+int paddleW= 33;
 int ballS=50; //ball size
 int ballXSpeed=5;
 int ballYSpeed=5;
@@ -15,32 +19,6 @@ int ballX=500;
 int ballY=500;
 int leftScore=0;
 int rightScore=0;
-
-boolean leftHit()
-{
-  //checks if ball is at the say Y as paddle and then at same X
-  if(ballY>=mouseY && ballY<=mouseY+paddleH && ballX-ballS/2<=paddleW) //paddle is in space 0-paddleW wide
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
-
-boolean rightHit()
-{
-  //checks if ball is at the say Y as paddle and then at same X
-  if(ballY>=rightPadY && ballY<=rightPadY+paddleH && ballX+ballS/2>=width-paddleW) //paddle is in space 0-paddleW wide
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
 
 void setup() {
   //size(1500, paddleH0); //window size
@@ -55,6 +33,10 @@ void setup() {
   in.start();
   amp = new Amplitude(this);
   amp.input(in);
+  rightPadY = height - paddleH;
+  rect(width-paddleW,rightPadY,paddleW,paddleH);
+  rect(0,height,paddleW,paddleH);
+  println(width);
 }
 
 void draw() {
@@ -75,25 +57,21 @@ void draw() {
     rect(0, height-paddleH, paddleW, paddleH); 
   }
   //Right Pad
-  rightPadY = (int)(height - (height * (amp.analyze() * SCALER)) - paddleH);
+  
+  r_yvel = (alpha * ((amp.analyze() * SCALER) - rightPadY))+((1-alpha) * rightPadY);
+  //println(r_yvel);
+  if(abs(r_yvel) < exceed_gravity){
+    r_yvel = gravity;
+  }
+  rightPadY += r_yvel;
   if (rightPadY <= 0){
     rightPadY = 0;
   }
-  rect(width-paddleW,rightPadY,paddleW,paddleH);
-  
-  
-  ////////////////////////////
-  //makes right paddle also controled with mouse
-  /*if(mouseY<height-paddleH) //right paddle
-  {
-    rect(967, mouseY, paddleW, paddleH); 
+  else if(rightPadY >= height - 100){
+    rightPadY = height - 100;
   }
-  else
-  {
-    rect(967, 800, paddleW, paddleH); 
-  }*/
-  ////////////////////////////
-  
+  rect(width-paddleW,rightPadY,paddleW,paddleH);
+
   ellipse(ballX,ballY,ballS,ballS);
   ballX+=ballXSpeed;
   ballY+=ballYSpeed;
@@ -139,10 +117,39 @@ void draw() {
   }
   
   
+  
+  
+  
+}
+boolean leftHit()
+{
+  //checks if ball is at the say Y as paddle and then at same X
+  if(ballY>=mouseY && ballY<=mouseY+paddleH && ballX-ballS/2<=paddleW) //paddle is in space 0-paddleW wide
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+boolean rightHit()
+{
+  //checks if ball is at the say Y as paddle and then at same X
+  if(ballY>=rightPadY && ballY<=rightPadY+paddleH && ballX+ballS/2>=width-paddleW) //paddle is in space 0-paddleW wide
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+void keyPressed() {
   if ((keyPressed == true) && (key == 'o')) //closes the game
   {
     exit();
   }
-  
-  
 }
