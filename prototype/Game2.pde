@@ -1,22 +1,26 @@
 import processing.sound.*;
 
-final float SCALER = -2000; //change how much an affect loudness has
+
+final float SCALER = -800; //change how much an affect loudness has
 float alpha = 0.5;
 float r_amp = 0;
 float l_amp = 0;
-int r_freq = 0;
-int l_freq = 0;
+int r_freq = 1;
+int l_freq = 1;
 float r_yvel = 0;
-float max;
 float l_yvel = 0;
+float max;
 float gravity = 9.8; //how fast the paddle falls
 float exceed_gravity = 9.8; //volume must exceed this to fall
 Amplitude amp;
 FFT fft;
 int bands = 4096;
 float[] spectrum = new float[bands];
-AudioIn in;
-AudioIn in2;
+AudioIn in; //input for amplitude
+AudioIn in2; //input for frequency
+
+int toggle = -1;
+
 
 int paddleSpeed=15;
 int paddleH=100;
@@ -38,10 +42,11 @@ void setup() {
   /*press esc to quit full screen
     fullscreen(1) launches in screen one is there are multiple screens
     fullscreen(2) launches in screen two and so on */
- // fullScreen(); //press esc to quit
+  //fullScreen(); //press esc to quit
   noStroke(); //for mouse
   fill(0); //fill shapes in black
   textSize(64);
+  
   rightPadX=width-paddleW;
   in = new AudioIn(this,0);
   in2 = new AudioIn(this,0);
@@ -55,18 +60,23 @@ void setup() {
  
   rightPadY = height/2;
   leftPadY = height/2;
-  rect(rightPadX,rightPadY,paddleW,paddleH);
-  rect(leftPadX,leftPadY,paddleW,paddleH);
+ // rect(rightPadX,rightPadY,paddleW,paddleH);
+ // rect(leftPadX,leftPadY,paddleW,paddleH);
   //println(width);
 }
 
 void draw() {
-  background(255); //white
+  background(225,0,0); //white
+  if(toggle > 0) 
+    game();
+   else
+     text("Press enter to start",width/4, height/4, width/2, height/2);
+}
+void game(){
   text(leftScore, 50, 60);
   text(rightScore, width-paddleH, 60);
   ellipseMode(CENTER);
-  
-   fft.analyze(spectrum);
+   /*fft.analyze(spectrum);
    max = 0;
    for (int i = 0; i < bands; i++){
      if(spectrum[i] > max)
@@ -75,7 +85,8 @@ void draw() {
          l_freq = i;
       }
    }//*/
-   println(l_freq);
+  // println(l_freq);
+  
   //Left Pad
   l_amp = amp.analyze();
   l_yvel = (alpha * ((l_amp * SCALER) - leftPadY))+((1-alpha) * leftPadY);
@@ -90,9 +101,18 @@ void draw() {
   else if(leftPadY >= height - 100){
     leftPadY = height - 100;
   }
+  if(keyPressed == true && key == 'd'){
+    if(leftPadX <= (width/4)-paddleW)
+      leftPadX+=gravity;
+  }
+  else if(keyPressed == true && key == 'a'){
+    if (leftPadX > 0)
+      leftPadX-=gravity;
+  }
   rect(leftPadX,leftPadY,paddleW,paddleH);
   //Right Pad
   r_amp = amp.analyze();
+  //println(r_amp);
   r_yvel = (alpha * ((r_amp * SCALER) - rightPadY))+((1-alpha) * rightPadY);
   //println(r_yvel);
   if(abs(r_yvel) < exceed_gravity){
@@ -105,7 +125,15 @@ void draw() {
   else if(rightPadY >= height - 100){
     rightPadY = height - 100;
   }
-  rect(width-paddleW,rightPadY,paddleW,paddleH);
+  if(keyPressed == true && key == 'j'){
+    if(rightPadX >= (width - width/4))
+      rightPadX-=gravity;
+  }
+  else if(keyPressed == true && key == 'l'){
+    if (rightPadX < width - paddleW)
+      rightPadX+=gravity;
+  }
+  rect(rightPadX,rightPadY,paddleW,paddleH);
 
   ellipse(ballX,ballY,ballS,ballS);
   ballX+=ballXSpeed;
@@ -203,5 +231,9 @@ void keyPressed() {
   if ((keyPressed == true) && (key == 'o')) //closes the game
   {
     exit();
+  }
+  else if ((keyPressed == true) && (key == ENTER)) //sets the toggle
+  {  
+    toggle *= -1;
   }
 }
