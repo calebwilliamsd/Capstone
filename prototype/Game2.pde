@@ -4,12 +4,19 @@ final float SCALER = -2000; //change how much an affect loudness has
 float alpha = 0.5;
 float r_amp = 0;
 float l_amp = 0;
+int r_freq = 0;
+int l_freq = 0;
 float r_yvel = 0;
+float max;
 float l_yvel = 0;
 float gravity = 9.8; //how fast the paddle falls
 float exceed_gravity = 9.8; //volume must exceed this to fall
 Amplitude amp;
+FFT fft;
+int bands = 4096;
+float[] spectrum = new float[bands];
 AudioIn in;
+AudioIn in2;
 
 int paddleSpeed=15;
 int paddleH=100;
@@ -27,19 +34,25 @@ int leftScore=0;
 int rightScore=0;
 
 void setup() {
-  //size(1500, 600); //window size
+  size(600, 600); //window size
   /*press esc to quit full screen
     fullscreen(1) launches in screen one is there are multiple screens
     fullscreen(2) launches in screen two and so on */
-  fullScreen(); //press esc to quit
+ // fullScreen(); //press esc to quit
   noStroke(); //for mouse
   fill(0); //fill shapes in black
   textSize(64);
   rightPadX=width-paddleW;
   in = new AudioIn(this,0);
+  in2 = new AudioIn(this,0);
   in.start();
+  in2.start();
+  fft = new FFT(this, bands);
   amp = new Amplitude(this);
+  
+  fft.input(in2);
   amp.input(in);
+ 
   rightPadY = height/2;
   leftPadY = height/2;
   rect(rightPadX,rightPadY,paddleW,paddleH);
@@ -52,6 +65,17 @@ void draw() {
   text(leftScore, 50, 60);
   text(rightScore, width-paddleH, 60);
   ellipseMode(CENTER);
+  
+   fft.analyze(spectrum);
+   max = 0;
+   for (int i = 0; i < bands; i++){
+     if(spectrum[i] > max)
+      {
+         max = spectrum[i];
+         l_freq = i;
+      }
+   }//*/
+   println(l_freq);
   //Left Pad
   l_amp = amp.analyze();
   l_yvel = (alpha * ((l_amp * SCALER) - leftPadY))+((1-alpha) * leftPadY);
