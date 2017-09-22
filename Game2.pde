@@ -129,13 +129,15 @@ void game(){
         otherCords = int(split(input, ' '));  // Split values into an array
       }
   }
+  try{
   rightPadX=otherCords[0];
   rightPadY=otherCords[1];
   ballX=otherCords[2];
   ballY=otherCords[3];
   leftScore=otherCords[4];
   rightScore=otherCords[5];
-    
+  }
+  catch(ArrayIndexOutOfBoundsException e){println("d");}
   rect(rightPadX,rightPadY,paddleW,paddleH);
 
   ellipse(ballX,ballY,ballS,ballS);

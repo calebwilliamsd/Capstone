@@ -95,7 +95,10 @@ void draw() {
         otherCords = int(split(input, ' '));  // Split values into an array
       }
   }
-  leftPadY=otherCords[1];
+  try{
+    leftPadY=otherCords[1];
+  }
+  catch(ArrayIndexOutOfBoundsException e){println("F");}
   if (leftPadY<0)
   {
     rect(leftPadX,0,paddleW,paddleH); //can't go above screen 
