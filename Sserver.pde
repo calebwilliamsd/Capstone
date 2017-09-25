@@ -39,7 +39,7 @@ int leftScore=0;
 int rightScore=0;
 //networking
 
-
+ boolean connect=false;
 Client myClient;
 String input;
 int[] otherCords={0,0};
@@ -66,8 +66,11 @@ void setup() {
   amp.input(in);
   rightPadX=width-paddleW;
   myServer=new Server (this, 12366); // Start a simple server on a port
-  boolean connect=false;
-  while(connect==false) //don't move on to the game until client connects
+}
+
+void draw() {
+  background(255); //white
+  if(!connect) //don't move on to the game until client connects
   {
       delay(500); //wait half a second
       if(myServer.available()!=null) //if available then it connected
@@ -76,11 +79,12 @@ void setup() {
          println("connect");
       }
   }
+  if(connect){
+    Game();
+  }
 }
-
-void draw() {
-  background(255); //white
-  text(leftScore, 50, 60);
+void Game(){
+    text(leftScore, 50, 60);
   text(rightScore, width-paddleH, 60);
   ellipseMode(CENTER);
 
@@ -186,7 +190,7 @@ void draw() {
 void keyPressed() {
   if ((keyPressed == true) && (key == 'o')) //closes the game
   {
-    myClient.stop();
+    myServer.stop();
     exit();
   }
   else if ((keyPressed == true) && (key == ENTER)) //sets the toggle
