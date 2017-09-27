@@ -3,7 +3,8 @@ import processing.sound.*;
 
 
 final float SCALER = -800; //change how much an affect loudness has
-float alpha = 0.5;
+final float alpha = 0.5;
+final int frames = 60;
 float r_amp = 0;
 float l_amp = 0;
 int r_freq = 1;
@@ -15,10 +16,12 @@ float gravity = 9.8; //how fast the paddle falls
 float exceed_gravity = 9.8; //volume must exceed this to fall
 Amplitude amp;
 FFT fft;
-int bands = 4096;
+int bands = 128;
 float[] spectrum = new float[bands];
 AudioIn in; //input for amplitude
 AudioIn in2; //input for frequency
+int ave = 0;
+int count = 0;
 
 int toggle = -1;
 
@@ -40,7 +43,8 @@ int rightScore=0;
 
 Client myClient; 
 String input;
-int[] otherCords={0,0,0,0,0,0}; 
+int[] otherCords={0,0,0,0,0,0};
+int[] copy_cords={0,0,0,0,0,0};
 
 
 void setup() {
@@ -52,7 +56,7 @@ void setup() {
   noStroke(); //for mouse
   fill(0); //fill shapes in black
   textSize(64);
-  frameRate(60);
+  frameRate(frames);
   rightPadX=width-paddleW;
   in = new AudioIn(this,0);
   in2 = new AudioIn(this,0);
@@ -69,7 +73,7 @@ void setup() {
  // rect(rightPadX,rightPadY,paddleW,paddleH);
  // rect(leftPadX,leftPadY,paddleW,paddleH);
   //println(width);
-  myClient = new Client(this, "150.156.212.37", 12366); // Replace with your server’s IP and port
+  myClient = new Client(this, "150.156.213.141", 12366); // Replace with your server’s IP and port
 
 }
 
@@ -85,7 +89,7 @@ void game(){
   text(leftScore, 50, 60);
   text(rightScore, width-paddleH, 60);
   ellipseMode(CENTER);
-   /*fft.analyze(spectrum);
+   fft.analyze(spectrum);
    max = 0;
    for (int i = 0; i < bands; i++){
      if(spectrum[i] > max)
@@ -94,7 +98,17 @@ void game(){
          l_freq = i;
       }
    }//*/
-  // println(l_freq);
+   ave+=l_freq;
+   if(count == frames){
+     ave = ave/frames;
+     count = 0;
+     println(ave);
+     ballX += ave;
+    // println("Balls" + ballXSpeed);
+     ave = 0;
+   }
+   count++;
+   //println(l_freq);
   
   //Left Pad
   l_amp = amp.analyze();
@@ -126,8 +140,12 @@ void game(){
       if(input.indexOf("\n") != -1)
       {
         input = input.substring(0, input.indexOf("\n"));  // Only up to the newline
+        if(input.length() < 5)
+          println(input.length());
         otherCords = int(split(input, ' '));  // Split values into an array
-      }
+        if(otherCords.length < 5)
+          println(otherCords.length);
+    }
   }
   try{
   rightPadX=otherCords[0];
@@ -136,8 +154,19 @@ void game(){
   ballY=otherCords[3];
   leftScore=otherCords[4];
   rightScore=otherCords[5];
+  for(int i =0; i < otherCords.length;i++){
+    copy_cords[i] = otherCords[i];
   }
-  catch(ArrayIndexOutOfBoundsException e){println("d");}
+  }
+  catch(ArrayIndexOutOfBoundsException e){
+  rightPadX = copy_cords[0];
+  rightPadY= copy_cords[1];
+  ballX= copy_cords[2];
+  ballY= copy_cords[3];
+  leftScore = copy_cords[4];
+  rightScore= copy_cords[5];
+  println("Size: " + otherCords.length + "\n" + e.toString());
+}
   rect(rightPadX,rightPadY,paddleW,paddleH);
 
   ellipse(ballX,ballY,ballS,ballS);
