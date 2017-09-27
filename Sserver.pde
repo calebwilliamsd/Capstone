@@ -4,7 +4,8 @@ import processing.sound.*;
 
 
 final float SCALER = -800; //change how much an affect loudness has
-float alpha = 0.5;
+final float alpha = 0.5;
+final int frames = 60;
 float r_amp = 0;
 float l_amp = 0;
 int r_freq = 1;
@@ -16,10 +17,12 @@ float gravity = 9.8; //how fast the paddle falls
 float exceed_gravity = 9.8; //volume must exceed this to fall
 Amplitude amp;
 FFT fft;
-int bands = 4096;
+int bands = 128;
 float[] spectrum = new float[bands];
 AudioIn in; //input for amplitude
 AudioIn in2; //input for frequency
+int ave = 0;
+int count = 0;
 
 int toggle = -1;
 
@@ -31,8 +34,8 @@ int leftPadX=0;
 int paddleH=100;
 int paddleW=33;
 int ballS=50; //ball size
-int ballXSpeed=5;
-int ballYSpeed=5;
+int ballXSpeed=1;
+int ballYSpeed=1;
 int ballX=500;
 int ballY=500;
 int leftScore=0;
@@ -43,6 +46,7 @@ int rightScore=0;
 Client myClient;
 String input;
 int[] otherCords={0,0};
+int[] copy_cords={0,0};
 Server myServer;
 
 void setup() {
@@ -87,7 +91,26 @@ void Game(){
     text(leftScore, 50, 60);
   text(rightScore, width-paddleH, 60);
   ellipseMode(CENTER);
-
+   fft.analyze(spectrum);
+   max = 0;
+   for (int i = 0; i < bands; i++){
+     if(spectrum[i] > max)
+      {
+         max = spectrum[i];
+         l_freq = i;
+      }
+   }//*/
+   ave+=l_freq;
+   if(count == frames){
+     ave = ave/frames;
+     count = 0;
+     println(ave);
+     if(ave > 30)
+       ballX += width/8;//*ave;
+    // println("Balls" + ballXSpeed);
+     ave = 0;
+   }
+   count++;
   input=null;
   myClient=myServer.available();
   if(myClient!=null)
@@ -100,9 +123,16 @@ void Game(){
       }
   }
   try{
+    leftPadX=otherCords[0];
     leftPadY=otherCords[1];
+    copy_cords[0] = otherCords[0];
+    copy_cords[1] = otherCords[1];
   }
-  catch(ArrayIndexOutOfBoundsException e){println("F");}
+  catch(ArrayIndexOutOfBoundsException e){
+  leftPadX=copy_cords[0];
+   leftPadY=copy_cords[1];
+  
+  println("Size: " + otherCords.length + "\n" + e.toString());}
   if (leftPadY<0)
   {
     rect(leftPadX,0,paddleW,paddleH); //can't go above screen 
