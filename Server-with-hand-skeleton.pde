@@ -224,7 +224,7 @@ void draw() {
   float avg = (accessMic.left.level()+accessMic.right.level())/2;
   
 
-  //Right Pad
+  ///Right Pad
   
   r_yvel = (alpha * ((avg * SCALER) - rightPadY))+((1-alpha) * rightPadY);
   //println(r_yvel);
