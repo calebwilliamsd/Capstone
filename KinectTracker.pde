@@ -37,7 +37,7 @@ boolean       autoCalib=true;
 
  // add focus gesture to initialise tracking
  kinect.addGesture("Wave");
-// kinect.addGesture("Click");
+
 scaledX = (float)width/kinect.depthWidth();
   scaledY = (float)height/kinect.depthHeight();
 //  println(scaledX);
