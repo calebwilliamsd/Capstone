@@ -1,8 +1,13 @@
 
 
+
+
 class KinectTracker {
   
 //  boolean handTrackFlag = false;
+int oneTime = 0;
+float prevAngle = 0;
+float diffAngle = 0;
   // Left Arm Vectors
 PVector lHand = new PVector();
 PVector lElbow = new PVector();
@@ -24,8 +29,8 @@ float[] angles = new float[9];
 
 boolean       autoCalib=true;
 
-//float scaledX;
-//float scaledY;
+float halfX;
+float halfY;
  KinectTracker() {
 
   kinect.setMirror(true);
@@ -37,9 +42,11 @@ boolean       autoCalib=true;
 
  // add focus gesture to initialise tracking
  kinect.addGesture("Wave");
-
+// kinect.addGesture("Click");
 scaledX = (float)width/kinect.depthWidth();
   scaledY = (float)height/kinect.depthHeight();
+  halfX = (float)width/2;
+  halfY = (float)height/2;
 //  println(scaledX);
 //  println(kinect.depthWidth());
 }  
@@ -49,13 +56,14 @@ scaledX = (float)width/kinect.depthWidth();
 void display(){
  kinect.update();
  kinect.convertRealWorldToProjective(handVec,mapHandVec); 
- println(mapHandVec.x);
+ 
  image(kinect.depthImage(), 0, 0, width, height);
- strokeWeight(10);
+ strokeWeight(20);
  stroke(handPointCol);
  if(handTrackFlag == true){
  point(mapHandVec.x * scaledX, mapHandVec.y * scaledY);
  }
+ strokeWeight(10);
   // draw the skeleton if it's available
   int[] userList = kinect.getUsers();
   for(int i=0;i<userList.length;i++)
@@ -65,8 +73,28 @@ void display(){
   }    
   
   if (kinect.isTrackingSkeleton(1)) {
+    prevAngle = angles[1];
+    
     updateAngles();
-    println(angles[1]);
+    diffAngle = angles[1] - prevAngle;
+    if(ballX >= width/2 && oneTime == 0){
+    if(diffAngle > 0.4 && diffAngle < 1.0) {
+      if(ballY-diffAngle < 0)
+        ballY = 0;
+      else {
+
+        ballS+=diffAngle*20;
+        oneTime = 1;
+      }
+    }
+    else if(diffAngle < -0.4 && diffAngle > -1.0) {
+
+         ballS+=diffAngle*20;
+         oneTime = 1;
+    }
+    }
+    else if(ballX < width/2)
+      oneTime = 0;
     drawSkeleton(1);
 }
  
@@ -114,7 +142,12 @@ kinect.convertRealWorldToProjective(lElbow, lElbow);
 kinect.convertRealWorldToProjective(lShoulder, lShoulder);
 kinect.convertRealWorldToProjective(rHand, rHand);
 kinect.convertRealWorldToProjective(rElbow, rElbow);
+//kinect.convertRealWorldToProjective(rShoulder, rShoulder);
+
 kinect.convertRealWorldToProjective(rShoulder, rShoulder);
+
+
+//println(rShoulder);
 
 // Left-Side Angles
 angles[1] = angle(lShoulder, lElbow, lHand);
@@ -137,28 +170,52 @@ void drawSkeleton(int userId)
   kinect.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_NECK,jointPos);
   println(jointPos);
   */
+//  println(SimpleOpenNI.SKEL_HEAD);
+  drawLimb(userId, SimpleOpenNI.SKEL_HEAD, SimpleOpenNI.SKEL_NECK);
+
+  drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_LEFT_SHOULDER);
+  drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_LEFT_ELBOW);
+  drawLimb(userId, SimpleOpenNI.SKEL_LEFT_ELBOW, SimpleOpenNI.SKEL_LEFT_HAND);
+
+  drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_RIGHT_SHOULDER);
+  drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_ELBOW);
   
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_HEAD, SimpleOpenNI.SKEL_NECK);
+  
+  drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
 
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_LEFT_SHOULDER);
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_LEFT_ELBOW);
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_ELBOW, SimpleOpenNI.SKEL_LEFT_HAND);
+  drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
+  drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
+  
+   
 
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_RIGHT_SHOULDER);
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_ELBOW);
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
+  drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_LEFT_HIP);
+  drawLimb(userId, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_LEFT_KNEE);
+  drawLimb(userId, SimpleOpenNI.SKEL_LEFT_KNEE, SimpleOpenNI.SKEL_LEFT_FOOT);
 
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
-
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_LEFT_HIP);
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_LEFT_KNEE);
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_KNEE, SimpleOpenNI.SKEL_LEFT_FOOT);
-
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_RIGHT_HIP);
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_RIGHT_KNEE);
-  kinect.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);  
+  drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_RIGHT_HIP);
+  drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_RIGHT_KNEE);
+  drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);  
 }
 
+void drawLimb(int userId, int jointType1, int jointType2)
+{
+  PVector jointPos1 = new PVector();
+  PVector jointPos2 = new PVector();
+  float  confidence;
+ 
+  // draw the joint position
+  confidence = kinect.getJointPositionSkeleton(userId, jointType1, jointPos1);
+  confidence = kinect.getJointPositionSkeleton(userId, jointType2, jointPos2);
+ 
+
+  // invert the y values and offset by height/2 and width/2 
+  line(jointPos1.x +halfX, (height - jointPos1.y) - halfY, jointPos2.x + halfX, (height - jointPos2.y) - halfY);
+
+}
+
+
+
+
   
 }
+
