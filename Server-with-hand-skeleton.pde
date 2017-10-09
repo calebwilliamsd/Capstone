@@ -1,3 +1,4 @@
+
 import SimpleOpenNI.*;
 import processing.serial.*;
 import processing.net.*;
@@ -10,6 +11,11 @@ import ddf.minim.*;
 Minim       minim;
 AudioInput  accessMic;
 FFT         fft;
+int sampleRate= 44100;//sapleRate of 44100
+float [] max= new float [sampleRate/2];//array that contains the half of the sampleRate size, because FFT only reads the half of the sampleRate frequency. This array will be filled with amplitude values.
+float maximum;//the maximum amplitude of the max array
+float frequency;//the frequency in hertz
+
 
 float boxSize;
 float alpha = 0.5;
@@ -43,6 +49,7 @@ int prevLeft = 0;
 int prevMapX = 0;
 float scaledX;
 float scaledY;
+int diffX = 0;
 
 
 boolean leftHit()
@@ -103,13 +110,14 @@ PVector mapHandVec = new PVector();
 color handPointCol = color(255,0,0);
 
 void setup() {
-  size(1000, 700);
+  size(1200, 650);
  kinect = new SimpleOpenNI(this);
  kt = new KinectTracker();
  frameRate(60);
  rightPadX=(width)-paddleW;
  minim = new Minim(this);
-  accessMic = minim.getLineIn();
+  accessMic = minim.getLineIn(Minim.MONO, 4096, sampleRate);
+  fft = new FFT(accessMic.left.size(), sampleRate);
 //  myServer=new Server (this, 12367); // Start a simple server on a port
 //  boolean connect=false;
 //  while(connect==false) //don't move on to the game until client connects
@@ -157,6 +165,9 @@ void onUpdateHands(int handId, PVector pos, float time)
 void onProgressGesture(String strGesture, PVector position,float progress){
   println("onProgressGesture - strGesture: " + strGesture + ", position: " + position + ", progress:" + progress);
   kinect.startTrackingHands(position);
+  if(!kinect.isTrackingSkeleton(1)){
+   kinect.requestCalibrationSkeleton(1, true); 
+  }
  
  handTrackFlag=true;
 }
@@ -171,6 +182,21 @@ void draw() {
   fill(0, 102, 153);
   text(rightScore, width-paddleH, 60);
   ellipseMode(CENTER);
+  
+  // Start freq
+  fft.forward(accessMic.left);
+  for (int f=0;f<sampleRate/2;f++) { //analyses the amplitude of each frequency analysed, between 0 and 22050 hertz
+    max[f]=fft.getFreq(float(f)); //each index is correspondent to a frequency and contains the amplitude value 
+  }
+  maximum=max(max);//get the maximum value of the max array in order to find the peak of volume
+ 
+  for (int i=0; i<max.length; i++) {// read each frequency in order to compare with the peak of volume
+    if (max[i] == maximum) {//if the value is equal to the amplitude of the peak, get the index of the array, which corresponds to the frequency
+      frequency= i;
+    }
+  }
+  
+  
   
 //input=null;
 //  myClient=myServer.available();
@@ -208,6 +234,7 @@ void draw() {
 
    prevMapX = rightPadX;
    rightPadX = (int)(mapHandVec.x * scaledX);
+   diffX = rightPadX - prevMapX;
    
 
   }
@@ -224,7 +251,7 @@ void draw() {
   float avg = (accessMic.left.level()+accessMic.right.level())/2;
   
 
-  ///Right Pad
+  //Right Pad
   
   r_yvel = (alpha * ((avg * SCALER) - rightPadY))+((1-alpha) * rightPadY);
   //println(r_yvel);
@@ -252,6 +279,7 @@ void draw() {
     ballXSpeed=-5;
     rightScore++;
     ballX=width/2; //reset ball
+    ballS=50;
     ballXSpeed=-ballXSpeed; 
   }
   else if(ballX>=width-ballS/2)
@@ -259,6 +287,7 @@ void draw() {
    ballXSpeed=5; 
    leftScore++; 
    ballX=width/2;
+   ballS=50;
    ballXSpeed=-ballXSpeed; 
   }
   if(ballY>height-ballS/2) //stay in bounds in Y
@@ -289,9 +318,9 @@ void draw() {
   else if(rightHit())
   {
     if(ballXSpeed < 0)
-      ballXSpeed-=abs((rightPadX-prevMapX)/10);
+      ballXSpeed-=abs(diffX/10);
     else
-      ballXSpeed+=abs((rightPadX-prevMapX)/10);
+      ballXSpeed+=abs(diffX/10);
     ballXSpeed=-ballXSpeed;
    
   }
