@@ -1,38 +1,26 @@
 int x = 500;
 int y = 300;
-float x_vel = 2;
-float y_vel = 2;
+
 int theta = 0;
+
 int ballXSpeed=2;
 int ballYSpeed=2;
 int ballX=100;
 int ballY=500;
 int ballS=10; //ball size
 
-boolean angle =false;
-
-boolean hit = false;
-boolean hit2 = false;
 int rheight = 100;
 int rwidth = 33;
+int l_hx;
+int l_hy;
 int lowX;
 int lowY;
-
-int x2 = 50;
-int y2 = 300;
 int r_highX;
 int r_highY;
 int r_lowX;
 int r_lowY;
 
-int lowX2;
-int lowY2;
-
-int r_highX2;
-int r_highY2;
-int r_lowX2;
-int r_lowY2;
-int theta2 = 0;
+float dia;
 
 void setup()
 {
@@ -42,6 +30,7 @@ void setup()
   fill(192);
   noStroke();
   frameRate(20);
+  dia = sqrt(((rheight/2)*(rheight/2)) + ((rwidth/2)*(rwidth/2)));
 }
 
 void draw() {
@@ -53,7 +42,7 @@ void draw() {
   
   pushMatrix();
   // move the origin to the pivot point
-  translate(x, y); 
+  translate(x + rwidth/2, y + rheight/2); 
   
   // then pivot the grid
   rotate(radians(theta));
@@ -61,116 +50,44 @@ void draw() {
   // and draw the square at the origin
   //fill(0);
    fill(0,0,255);
-  rect(0, 0, rwidth, (rheight));
+  rect(-rwidth/2, -rheight/2, rwidth, (rheight));
   popMatrix();
+  float dia_theta =  90 - degrees(acos((rheight/2)/dia));
+  //green
+  l_hx =(int)( x+rwidth/2 +(dia * -cos(radians(-theta-dia_theta))));
+  l_hy = (int)(y+rheight/2 +(dia * sin(radians(-theta-dia_theta))));
+  
+  //yellow
+  lowX = (int)( x+rwidth/2 +(dia * -cos(radians(theta-dia_theta))));
+  lowY= (int)(y+rheight/2 +(dia * -sin(radians(theta-dia_theta))));
+  
+  //magenta
+  r_highX = (int)( x+rwidth/2 +(dia * cos(radians(theta-dia_theta))));
+  r_highY= (int)(y+rheight/2 +(dia * sin(radians(theta-dia_theta))));
+  
+  //brown
+  r_lowX = (int)(x+rwidth/2 +(dia * cos(radians(-theta-dia_theta))));
+  r_lowY= (int)(y+rheight/2 +(dia * -sin(radians(-theta-dia_theta))));
 
-  lowX = (int)((x) + (rheight * -cos(radians(90-theta))));
-  lowY= (int)((y) + (rheight * sin(radians(90-theta))));
-
-  r_highX = (int)((x) + (rwidth * cos(radians(theta))));
-  r_highY= (int)((y) + (rwidth * sin(radians(theta))));
-
-  r_lowX = (int)(sin(radians(theta)) * (rheight*sin(radians(90))));
-  r_lowY= (int)(-cos(radians(theta)) * (rheight*sin(radians(90))));
-
+  theta++;
   fill(0,255,0);
+  //center
+  ellipse(x+rwidth/2,y+rheight/2,ballS,ballS);
+  
   //top left
-  ellipse(x,y,ballS,ballS);
+  ellipse(l_hx,l_hy,ballS,ballS);
+  fill(0,255,255);
   //bottom left
+   fill(255,255,0);
   ellipse(lowX,lowY,ballS,ballS);
   //top right
+  fill(255,0,255);
   ellipse(r_highX,r_highY,ballS,ballS);
+  fill(90,50,60);
   //bottom right
-  ellipse(r_highX - r_lowX,-r_lowY + r_highY,ballS,ballS);
-
-  fill(0);
-  ellipse(ballX,ballY,ballS,ballS);
-  ballX+=ballXSpeed;
-  ballY+=ballYSpeed;
-    if(ballX>width-ballS/2) //stay in bounds in X
-  {
-     ballXSpeed=-ballXSpeed;
-     hit2 = false;
-  }
-  else if(ballX<ballS/2)
-  {
-     ballXSpeed=-ballXSpeed;
-     hit = false;
-  }
-  
-  if(ballY>height-ballS/2) //stay in bounds in Y
-  {
-     ballYSpeed=-ballYSpeed; 
-  }
-  else if(ballY<ballS/2)
-  {
-     ballYSpeed=-ballYSpeed;
-  }
-  
-  
-     fill(192);
-  noStroke();
-  //rect(x2, y2, rwidth, rheight);
-  
-  pushMatrix();
-  // move the origin to the pivot point
-  translate(x2, y2); 
-  
-  // then pivot the grid
-  rotate(radians(theta2));
-  
-  // and draw the square at the origin
-  //fill(0);
-   fill(#0000FF);
-  rect(0, 0, rwidth, (rheight));
-  popMatrix();
-
-  lowX2 = (int)((x2) + (rheight * -cos(radians(90-theta2))));
-  lowY2= (int)((y2) + (rheight * sin(radians(90-theta2))));
-
-  r_highX2 = (int)((x2) + (rwidth * cos(radians(theta2))));
-  r_highY2= (int)((y2) + (rwidth * sin(radians(theta2))));
-  //top line
- // line(r_highX,r_highY, x,y);
-  r_lowX2 = (int)(sin(radians(theta2)) * (rheight*sin(radians(90))));
-  r_lowY2= (int)(-cos(radians(theta2)) * (rheight*sin(radians(90))));
-
-  fill(0,255,0);
-  //top left
-  ellipse(x2,y2,ballS,ballS);
-  //bottom left
-  ellipse(lowX2,lowY2,ballS,ballS);
-  //top right
-  ellipse(r_highX2,r_highY2,ballS,ballS);
-  //bottom right
-  ellipse(r_highX2 - r_lowX2,-r_lowY2 + r_highY2,ballS,ballS);
-  y2= mouseY;
-  x2= mouseX;
-  //theta2--;
-  if(checkIntersection(x,y, lowX, lowY, ballX,ballY, ballS) && !hit){
-    ballXSpeed *=-1;
-    hit = true;
-    hit2=false;
-    if(theta != 0 && ((theta < 0 && ballYSpeed < 0) || (theta > 0 && ballYSpeed > 0)))
-      ballYSpeed *= -1;
-  }
-  if(checkIntersection(r_highX2,r_highY2, r_highX2 - r_lowX2,-r_lowY2 + r_highY2, ballX,ballY, ballS) && !hit2){
-    ballXSpeed *=-1;
-    hit2 = true;
-    hit = false;
-    if(theta != 0 && ((theta > 0 && ballYSpeed < 0) || (theta < 0 && ballYSpeed > 0)))
-      ballYSpeed *= -1;
-  }
-  if(!angle){
-    theta++;
-    theta2--;
-    angle = theta == 45;
-  }
-  else{
-    theta--;
-    theta2++;
-    angle = !(theta == -45);
-  }
+  ellipse(r_lowX,r_lowY,ballS,ballS);
+  y = mouseY -rheight/2;
+  x = mouseX - rwidth/2;
 }
 
 
