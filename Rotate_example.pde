@@ -11,16 +11,17 @@ int ballS=10; //ball size
 
 int rheight = 100;
 int rwidth = 33;
-int l_hx;
-int l_hy;
-int lowX;
-int lowY;
+int l_highx;
+int l_highy;
+int l_lowX;
+int l_lowY;
 int r_highX;
 int r_highY;
 int r_lowX;
 int r_lowY;
 
 float dia;
+float dia_theta;
 
 void setup()
 {
@@ -29,8 +30,9 @@ void setup()
   smooth();
   fill(192);
   noStroke();
-  frameRate(20);
+  frameRate(60);
   dia = sqrt(((rheight/2)*(rheight/2)) + ((rwidth/2)*(rwidth/2)));
+  dia_theta =  90 - degrees(acos((rheight/2)/dia));
 }
 
 void draw() {
@@ -52,14 +54,14 @@ void draw() {
    fill(0,0,255);
   rect(-rwidth/2, -rheight/2, rwidth, (rheight));
   popMatrix();
-  float dia_theta =  90 - degrees(acos((rheight/2)/dia));
+  
   //green
-  l_hx =(int)( x+rwidth/2 +(dia * -cos(radians(-theta-dia_theta))));
-  l_hy = (int)(y+rheight/2 +(dia * sin(radians(-theta-dia_theta))));
+  l_highx =(int)( x+rwidth/2 +(dia * -cos(radians(-theta-dia_theta))));
+  l_highy = (int)(y+rheight/2 +(dia * sin(radians(-theta-dia_theta))));
   
   //yellow
-  lowX = (int)( x+rwidth/2 +(dia * -cos(radians(theta-dia_theta))));
-  lowY= (int)(y+rheight/2 +(dia * -sin(radians(theta-dia_theta))));
+  l_lowX = (int)( x+rwidth/2 +(dia * -cos(radians(theta-dia_theta))));
+  l_lowY= (int)(y+rheight/2 +(dia * -sin(radians(theta-dia_theta))));
   
   //magenta
   r_highX = (int)( x+rwidth/2 +(dia * cos(radians(theta-dia_theta))));
@@ -75,13 +77,13 @@ void draw() {
   ellipse(x+rwidth/2,y+rheight/2,ballS,ballS);
   
   //top left
-  ellipse(l_hx,l_hy,ballS,ballS);
+  ellipse(l_highx,l_highy,ballS,ballS);
   fill(0,255,255);
   //bottom left
    fill(255,255,0);
-  ellipse(lowX,lowY,ballS,ballS);
+  ellipse(l_lowX,l_lowY,ballS,ballS);
   //top right
-  fill(255,0,255);
+   fill(#FF00FF);
   ellipse(r_highX,r_highY,ballS,ballS);
   fill(90,50,60);
   //bottom right
