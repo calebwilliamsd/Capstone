@@ -609,16 +609,27 @@ if(checkIntersection(l_highx2,l_highy2, l_lowX2, l_lowY2, ballX,ballY, ballS/2) 
  if((x1+x2)/2 > (rightPadX+paddleW/2) && (rightPadX >= prevMapX)){
    
     
-      if(ballYSpeed > 0 && x2 > rightPadX+paddleW){
+      if(ballYSpeed > 0 && x2 > rightPadX){
       reflect.y =-reflect.y; 
       
      }
-     else if(ballYSpeed < 0 && x2 < rightPadX+paddleW)
+     else if(ballYSpeed < 0 && x2 < rightPadX)
        reflect.y=-reflect.y;
        
     reflect.x=-reflect.x;
      
 
+ }
+  if((x1+x2)/2 < (leftPadX+paddleW/2) && (lefttPadX <= prevMapX)){
+   
+    
+      if(ballYSpeed > 0 && x2 > leftPadX){
+      reflect.y =-reflect.y; 
+      
+     }
+     else if(ballYSpeed < 0 && x2 < leftPadX)
+       reflect.y=-reflect.y;
+       
  }
  // sets velocity of x to be 1 if it is less than 1 so it cannot get stuck
   if(abs(reflect.x) < 1){
